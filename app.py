@@ -25,9 +25,13 @@ def extract_text_from_image(image):
 
     # Parse the response
     result = response.json()
-
-    # Return the parsed text
-    return result.get("ParsedResults")[0].get("ParsedText")
+    
+    # Return the extracted text
+    parsed_results = result.get("ParsedResults")
+    if parsed_results:
+        return parsed_results[0].get("ParsedText", "No text found")
+    else:
+        return "No text found"
 
 # Streamlit app
 st.title("Text Extraction from Image")
