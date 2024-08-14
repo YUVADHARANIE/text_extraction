@@ -1,12 +1,9 @@
-# Install the required libraries
-!pip install pytesseract Pillow streamlit
-
 import streamlit as st
 import pytesseract
 from PIL import Image
 import io
 
-# Function to extract text from image
+# Function to extract text from an image
 def extract_text(image):
     text = pytesseract.image_to_string(image)
     return text
