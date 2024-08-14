@@ -1,28 +1,35 @@
-import os
-import sys
 import streamlit as st
-
-# Check if Tesseract is installed
-def install_tesseract():
-    if os.system("tesseract --version") != 0:
-        st.warning("Tesseract is not installed. Installing now...")
-        if sys.platform.startswith('linux'):
-            os.system("sudo apt-get update && sudo apt-get install -y tesseract-ocr")
-        elif sys.platform == 'darwin':  # macOS
-            os.system("brew install tesseract")
-        else:
-            st.error("Tesseract installation is only automated for Linux and macOS.")
-            return False
-    return True
-
-# Install Tesseract if not available
-if not install_tesseract():
-    st.stop()
-
-# Import other necessary libraries
+import requests
 from PIL import Image
-import pytesseract
+import io
 
+# Your API key
+api_key = 'K85949597588957'
+
+# OCR API URL
+ocr_url = 'https://api.ocr.space/parse/image'
+
+# Function to call the OCR API
+def extract_text_from_image(image):
+    # Convert image to bytes
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format='JPEG')
+    img_bytes = img_bytes.getvalue()
+
+    # Make the POST request to the OCR API
+    response = requests.post(
+        ocr_url,
+        files={'image': img_bytes},
+        data={'apikey': api_key}
+    )
+
+    # Parse the response
+    result = response.json()
+
+    # Return the parsed text
+    return result.get("ParsedResults")[0].get("ParsedText")
+
+# Streamlit app
 st.title("Text Extraction from Image")
 
 st.write("Upload an image to extract text")
@@ -34,10 +41,10 @@ if uploaded_file is not None:
     # Load image
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
-    
-    # Convert image to text
+
+    # Extract text
     st.write("Extracting text from the image...")
-    extracted_text = pytesseract.image_to_string(image)
+    extracted_text = extract_text_from_image(image)
     
     # Display extracted text
     st.write("Extracted Text:")
